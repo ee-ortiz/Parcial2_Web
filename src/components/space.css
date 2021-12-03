@@ -1,0 +1,22 @@
+.card {
+  width: 12em;
+  margin-bottom: 1.5em;
+}
+
+.card-img-top {
+  width: 3.5em;
+  height: auto;
+}
+
+.card-img-top {
+  width: 4em;
+  height: auto;
+}
+
+.card-header {
+  height: 4em;
+}
+
+.card-body {
+  height: 5em;
+}
