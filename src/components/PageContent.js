@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { FormattedMessage } from "react-intl";
 import Space from './Space';
 import Room from './Room';
+import TableDevice from "./TableDevice";
 import "./pageContent.css";
+import PieChart from "./PieChart";
+
 
 
 const urlSpaces = `https://gist.githubusercontent.com/josejbocanegra/0067d2b28b009140fee423cfc84e40e6/raw/6e6b11160fbcacb56621b6422684d615dc3a0d33/spaces.json`;
@@ -12,6 +16,12 @@ function PageContent(props) {
 
     const [ spaces, setSpaces ] = useState([]); 
     const [ rooms, setRooms ] = useState([]);
+    const [ actualSpaceId, setActualSpaceId] = useState();
+    const [ actualDevices, setActualDevices] = useState([]);
+
+    function cambioEspacio(){
+        setActualDevices([]);
+    }
 
     const fetchSpaces = async () => {
         const resp = await fetch(urlSpaces);
@@ -29,8 +39,6 @@ function PageContent(props) {
         });
         localStorage.setItem("spaces", JSON.stringify(space));
         setSpaces(space);
-
-        console.log(space);
     };
 
     const fetchRooms = async () => {
@@ -39,50 +47,90 @@ function PageContent(props) {
     
         const room = data?.map((resp) => {
           return {
-            homeId: resp.id,
+            homeId: resp.homeId,
             name: resp.name,
             devices: resp.devices,
-            type: resp.phone,
-            powerUsage: resp.type
+            type: resp.type,
+            powerUsage: resp.powerUsage
           };
         });
         localStorage.setItem("rooms", JSON.stringify(room));
         setRooms(room);
 
-        console.log(room);
     };
 
 
     useEffect(() => {
-        fetchSpaces();
-        fetchRooms();
-    }, []);
+        if (!navigator.onLine) {
+            if (localStorage.getItem("rooms") === null){
+                setRooms("Cargando cuartos");
+            } else {setRooms(JSON.parse(localStorage.getItem("rooms")));
+                }
 
+            if (localStorage.getItem("spaces") === null) {
+            setSpaces("Cargando espacios");
+            } else { setSpaces(JSON.parse(localStorage.getItem("spaces")));
+                }
+        } 
+            fetchSpaces();
+            fetchRooms();
+        
+        
+
+    }, [actualSpaceId, actualDevices]);
 
     return (
 
         <div className="container-fluid">
 
             <div className="row">
-                <div className="col-md-12">
-                    <h3>My spaces</h3>
+                <div className="col-12">
+                    <h3><FormattedMessage id="spacesTitle" /></h3>
                 </div>
-                {spaces?.map((e,i) => (
-                    <Space key={i} space={e}/>
-                    ))}
+
+                <div className="row d-flex justify-content-center">
+                    {spaces.map((e,i) => (
+                        <Space key={i} space={e} setActual={setActualSpaceId} espacioActual={actualSpaceId} cambioEspacio={cambioEspacio}/>
+                        ))}
+                </div>
             </div>
 
-            <div id="verticalSpace" class="col-md-12"></div>
+
+            <div id="verticalSpace" className="col-12"></div>
 
             <div className="row">
-                <div className="col-md-12">
-                    <h3>My rooms</h3>
-                </div>
-                {rooms?.map((e,i) => (
-                    <Room key={i} room={e}/>
-                    ))}
-
+                {actualSpaceId?(<div className="col-12">
+                    <div className="row">
+                        <h3><FormattedMessage id="roomsTitle" /></h3>
+                    </div>
+                    <div className="row">     
+                        {rooms.filter(room => room.homeId === actualSpaceId).map((e,i) => (
+                        <Room key={i} room={e} setActual={setActualDevices} tamano={rooms.filter(room => room.homeId === actualSpaceId).length } devices={actualDevices}/>
+                        ))} 
+                        <TableDevice  devices={actualDevices}/>      
+                    </div>
+                    
+                </div>):(<div className="col-md-12"> </div>)}
+                
+                
             </div>
+            {rooms.filter(room => room.homeId === actualSpaceId).length > 0?
+            
+                <>
+                    <div id="verticalSpace" className="col-md-12"></div><div className="row">
+                        <div className="col-md-12">
+                            <h3><FormattedMessage id="statsTitle" /></h3>
+                        </div>
+
+                        <div className="col-md-12">
+                            <PieChart data={rooms.filter(room => room.homeId === actualSpaceId)} outerRadius={160} innerRadius={0} />
+                        </div>
+                    </div>
+                </>:
+                <div></div>
+            }
+
+
         </div>
 
     );

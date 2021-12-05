@@ -1,22 +1,12 @@
 .card {
-  width: 12em;
+  width: 14.5em;
   margin-bottom: 1.5em;
 }
 
-.card-img-top {
-  width: 3.5em;
-  height: auto;
-}
-
-.card-img-top {
-  width: 4em;
-  height: auto;
-}
-
 .card-header {
-  height: 4em;
+  height: auto;
 }
 
 .card-body {
-  height: 5em;
+  height: auto;
 }
