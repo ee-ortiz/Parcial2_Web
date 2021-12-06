@@ -71,9 +71,10 @@ function PageContent(props) {
             setSpaces("Cargando espacios");
             } else { setSpaces(JSON.parse(localStorage.getItem("spaces")));
                 }
-        } 
+        } else{
             fetchSpaces();
             fetchRooms();
+        }
         
         
 
